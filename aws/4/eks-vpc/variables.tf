@@ -14,7 +14,7 @@ variable "cidr_block" {
 }
 
 variable "availability_zones" {
-  type        = list[string]
+  type        = list(string)
   description = "The availability zones to create subnets in"
 }
 

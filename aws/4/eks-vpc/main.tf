@@ -23,6 +23,7 @@ resource "aws_subnet" "public" {
   lifecycle { ignore_changes = [tags] }
 }
 
+# The default route, mapping the VPC's CIDR block to "local", is created implicitly.
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.network.id
   tags   = { Name = "${var.name}-public" }
@@ -69,14 +70,23 @@ resource "aws_default_route_table" "private" {
   tags                   = { Name = "${var.name}-private" }
 }
 
+resource "aws_route" "internet" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.private.id
+  depends_on             = [aws_internet_gateway.public]
+}
+
 resource "aws_route_table_association" "private" {
   count          = var.az_counts
   subnet_id      = aws_subnet.private.*.id[count.index]
   route_table_id = aws_default_route_table.private.id
 }
 
+# Only one as of now to save money.
 resource "aws_nat_gateway" "private" {
-  count             = var.az_counts
+  #count             = var.az_counts
   connectivity_type = "private"
-  subnet_id         = aws_subnet.private.*.id[count.index]
+  #subnet_id         = aws_subnet.private.*.id[count.index]
+  subnet_id = aws_subnet.private.*.id[0]
 }

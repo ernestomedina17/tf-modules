@@ -10,7 +10,7 @@ variable "region" {
 
 variable "cidr_block" {
   type        = string
-  description = "The CIDR block for the VPC."
+  description = "The CIDR block for the VPC. Minimum Netmask is 16"
 }
 
 variable "availability_zones" {
@@ -19,7 +19,6 @@ variable "availability_zones" {
 }
 
 variable "az_counts" {
-  type    = number
+  type        = number
   description = "Number of Availability Zones in the region"
-  default = 3
 }

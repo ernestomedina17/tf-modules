@@ -1,29 +1,8 @@
-resource "aws_vpc" "eks_network" {
+resource "aws_vpc" "network" {
   cidr_block           = var.cidr_block
   enable_dns_hostnames = true
   tags                 = { Name = var.name }
   lifecycle { ignore_changes = [tags, ] }
-}
-
-resource "aws_internet_gateway" "eks_network_internet_gateway" {
-  vpc_id = aws_vpc.eks_network.id
-  tags   = { Name = var.name }
-}
-
-resource "aws_route_table" "eks_network_public" {
-  vpc_id = aws_vpc.eks_network.id
-  tags   = { Name = "${var.name}-public" }
-}
-
-resource "aws_route" "internet-gateway" {
-  route_table_id         = aws_route_table.eks_network_public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.eks_network_internet_gateway.id
-}
-
-resource "aws_default_route_table" "eks_network_private" {
-  default_route_table_id = aws_vpc.eks_network.default_route_table_id
-  tags                   = { Name = "${var.name}-private" }
 }
 
 resource "aws_subnet" "public" {
@@ -31,7 +10,7 @@ resource "aws_subnet" "public" {
 
   availability_zone       = var.availability_zones[count.index]
   cidr_block              = cidrsubnet(var.cidr_block, 4, count.index)
-  vpc_id                  = aws_vpc.eks_network.id
+  vpc_id                  = aws_vpc.network.id
   map_public_ip_on_launch = true
 
   tags = {
@@ -41,18 +20,30 @@ resource "aws_subnet" "public" {
     "subnet-type"                    = "public"
   }
 
-  lifecycle {
-    ignore_changes = [
-      tags,
-    ]
-  }
+  lifecycle { ignore_changes = [tags] }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.network.id
+  tags   = { Name = "${var.name}-public" }
 }
 
 resource "aws_route_table_association" "public" {
-  count = var.az_counts
-
+  count          = var.az_counts
   subnet_id      = aws_subnet.public.*.id[count.index]
-  route_table_id = aws_route_table.eks_network_public.id
+  route_table_id = aws_route_table.network_public.id
+}
+
+resource "aws_internet_gateway" "public" {
+  vpc_id = aws_vpc.network.id
+  tags   = { Name = var.name }
+}
+
+resource "aws_route" "internet" {
+  route_table_id         = aws_route_table.network_public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.network_internet_gateway.id
+  depends_on             = [aws_internet_gateway.network_internet_gateway]
 }
 
 resource "aws_subnet" "private" {
@@ -60,7 +51,7 @@ resource "aws_subnet" "private" {
 
   availability_zone       = var.availability_zones[count.index]
   cidr_block              = cidrsubnet(var.cidr_block, 4, count.index + 4)
-  vpc_id                  = aws_vpc.eks_network.id
+  vpc_id                  = aws_vpc.network.id
   map_public_ip_on_launch = false
 
   tags = {
@@ -70,9 +61,22 @@ resource "aws_subnet" "private" {
     "subnet-type"                     = "private"
   }
 
-  lifecycle {
-    ignore_changes = [
-      tags,
-    ]
-  }
+  lifecycle { ignore_changes = [tags] }
+}
+
+resource "aws_default_route_table" "private" {
+  default_route_table_id = aws_vpc.network.default_route_table_id
+  tags                   = { Name = "${var.name}-private" }
+}
+
+resource "aws_route_table_association" "private" {
+  count          = var.az_counts
+  subnet_id      = aws_subnet.private.*.id[count.index]
+  route_table_id = aws_default_route_table.network_private.id
+}
+
+resource "aws_nat_gateway" "private" {
+  count             = var.az_counts
+  connectivity_type = "private"
+  subnet_id         = aws_subnet.private.*.id[count.index]
 }

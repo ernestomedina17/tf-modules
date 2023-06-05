@@ -1,5 +1,5 @@
 output "vpc_network_id" {
-  value = aws_vpc.eks_network.id
+  value = aws_vpc.network.id
 }
 
 output "private_subnet_id" {

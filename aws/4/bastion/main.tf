@@ -8,17 +8,7 @@ resource "aws_instance" "bastion" {
   tags = { Name = var.name }
 
   lifecycle {
-    ignore_changes = [
-      tags,
-      "capacity_reservation_specification",
-      "cpu_options",
-      "credit_specification",
-      "enclave_options",
-      "maintenance_options",
-      "metadata_options",
-      "private_dns_name_options",
-      "root_block_device",
-    ]
+    ignore_changes = [ all ]
   }
 }
 

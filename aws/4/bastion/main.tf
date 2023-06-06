@@ -8,7 +8,7 @@ resource "aws_instance" "bastion" {
   tags = { Name = var.name }
 
   lifecycle {
-    ignore_changes = [ all ]
+    ignore_changes = all
   }
 }
 

@@ -16,7 +16,7 @@ resource "aws_subnet" "public" {
   tags = {
     Name                             = "${var.name}-public-${var.availability_zones[count.index]}"
     "kubernetes.io/role/elb"         = "1"
-    "kubernetes.io/role/alb-ingress" = "1"
+    #"kubernetes.io/role/alb-ingress" = "1"
     "subnet-type"                    = "public"
   }
 
@@ -58,7 +58,7 @@ resource "aws_subnet" "private" {
   tags = {
     Name                              = "${var.name}-private-${var.availability_zones[count.index]}"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/role/alb-ingress"  = "1"
+    #"kubernetes.io/role/alb-ingress"  = "1"
     "subnet-type"                     = "private"
   }
 

@@ -1,0 +1,1 @@
+aws_kms_key plus aws_kms_key_policy resource policy

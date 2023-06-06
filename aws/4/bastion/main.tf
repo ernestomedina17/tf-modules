@@ -6,6 +6,12 @@ resource "aws_instance" "bastion" {
   key_name        = aws_key_pair.ssh_pub_key.id
 
   tags = { Name = var.name }
+
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
 }
 
 resource "aws_key_pair" "ssh_pub_key" {

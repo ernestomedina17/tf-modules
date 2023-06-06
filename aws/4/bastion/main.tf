@@ -5,13 +5,11 @@ resource "aws_instance" "bastion" {
   security_groups = concat(var.security_groups, [aws_security_group.ssh.id])
   key_name        = aws_key_pair.ssh_pub_key.id
 
-  tags = {
-    Name = var.name
-  }
+  tags = { Name = var.name }
 }
 
 resource "aws_key_pair" "ssh_pub_key" {
-  key_name   = var.ssh_key_name
+  key_name   = var.name
   public_key = sensitive(var.ssh_pub_key_content)
 }
 
@@ -29,7 +27,5 @@ resource "aws_security_group" "ssh" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = {
-    Name = "allow_ssh"
-  }
+  tags = { Name = "allow_ssh" }
 }

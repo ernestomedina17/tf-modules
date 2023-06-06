@@ -23,11 +23,6 @@ variable "name" {
   description = "Name of the instance"
 }
 
-variable "ssh_key_name" {
-  type        = string
-  description = "name or id of the aws_key_pair"
-}
-
 variable "ssh_pub_key_content" {
   type        = string
   sensitive   = true

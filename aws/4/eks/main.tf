@@ -90,6 +90,12 @@ resource "null_resource" "kubectl" {
   ]
 }
 
+resource "aws_eks_addon" "vpc-cni" {
+  cluster_name = aws_eks_cluster.cluster.name
+  addon_name   = "vpc-cni"
+  depends_on = [ null_resource.kubectl ]
+}
+
 resource "aws_iam_role" "nodes" {
   name = "eks-node-group-${var.name}"
 

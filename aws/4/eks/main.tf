@@ -94,12 +94,11 @@ resource "null_resource" "kubectl" {
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.cluster.name
   addon_name   = "vpc-cni"
-  depends_on   = [null_resource.kubectl]
+  depends_on   = [aws_eks_cluster.cluster]
 }
 
 data "tls_certificate" "cert" {
   url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-  #depends_on = [ aws_eks_cluster.cluster ]
 }
 
 # Required by vpc-cni plugin
@@ -107,7 +106,7 @@ resource "aws_iam_openid_connect_provider" "openid" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = data.tls_certificate.cert.certificates[*].sha1_fingerprint
   url             = data.tls_certificate.cert.url
-  depends_on      = [aws_eks_addon.vpc_cni]
+  depends_on      = [aws_eks_cluster.cluster]
 }
 
 data "aws_iam_policy_document" "nodes" {
@@ -148,6 +147,7 @@ data "aws_iam_policy_document" "nodes" {
 resource "aws_iam_role" "nodes" {
   name               = "eks-node-group-${var.name}"
   assume_role_policy = data.aws_iam_policy_document.nodes.json
+  depends_on         = [aws_eks_cluster.cluster]
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {

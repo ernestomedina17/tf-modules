@@ -14,10 +14,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name                             = "${var.name}-public-${var.availability_zones[count.index]}"
-    "kubernetes.io/role/elb"         = "1"
+    Name                     = "${var.name}-public-${var.availability_zones[count.index]}"
+    "kubernetes.io/role/elb" = "1"
     #"kubernetes.io/role/alb-ingress" = "1"
-    "subnet-type"                    = "public"
+    "subnet-type" = "public"
   }
 
   lifecycle { ignore_changes = [tags] }
@@ -40,12 +40,16 @@ resource "aws_internet_gateway" "public" {
   tags   = { Name = var.name }
 }
 
+resource "aws_eip" "public" {
+  domain = "vpc"
+}
+
 # Only one as of now to save money.
 resource "aws_nat_gateway" "public" {
-  #count             = var.az_counts
+  allocation_id     = aws_eip.public.id
   connectivity_type = "public"
-  #subnet_id         = aws_subnet.private.*.id[count.index]
-  subnet_id = aws_subnet.pubilc.*.id[0]
+  subnet_id         = aws_subnet.public.*.id[0]
+  depends_on        = [aws_internet_gateway.public]
 }
 
 resource "aws_route" "public" {
@@ -67,7 +71,7 @@ resource "aws_subnet" "private" {
     Name                              = "${var.name}-private-${var.availability_zones[count.index]}"
     "kubernetes.io/role/internal-elb" = "1"
     #"kubernetes.io/role/alb-ingress"  = "1"
-    "subnet-type"                     = "private"
+    "subnet-type" = "private"
   }
 
   lifecycle { ignore_changes = [tags] }
@@ -81,8 +85,8 @@ resource "aws_default_route_table" "private" {
 resource "aws_route" "private" {
   route_table_id         = aws_default_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.private.id
-  depends_on             = [aws_nat_gateway.private]
+  #nat_gateway_id         = aws_nat_gateway.private.id
+  #depends_on             = [aws_nat_gateway.private]
 }
 
 resource "aws_route_table_association" "private" {

@@ -90,10 +90,46 @@ resource "null_resource" "kubectl" {
   ]
 }
 
-resource "aws_eks_addon" "vpc-cni" {
+# AWS says this is not required but the nodes won't work without it.
+resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.cluster.name
   addon_name   = "vpc-cni"
   depends_on = [ null_resource.kubectl ]
+}
+
+data "tls_certificate" "cert" {
+  url = aws_eks_cluster.example.identity[0].oidc[0].issuer
+  #depends_on = [ aws_eks_cluster.cluster ]
+}
+
+resource "aws_iam_openid_connect_provider" "openid" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.cert.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cert.url
+  depends_on = [ aws_eks_addon.vpc_cni ]
+}
+
+data "aws_iam_policy_document" "openid" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.openid.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-node"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.opendi.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "openid" {
+  assume_role_policy = data.aws_iam_policy_document.openid.json
+  name               = "${var.name}-openid"
 }
 
 resource "aws_iam_role" "nodes" {
@@ -132,40 +168,40 @@ resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
   role       = aws_iam_role.nodes.name
 }
 
-resource "aws_eks_node_group" "nodes" {
-  cluster_name    = aws_eks_cluster.cluster.name
-  node_group_name = var.name
-  node_role_arn   = aws_iam_role.nodes.arn
-  subnet_ids      = var.subnets_node_group
-  version         = var.k8s_version
-  release_version = var.ami_release_version
-  capacity_type   = var.capacity_type    # default
-  disk_size       = var.disk_size        # default
-  instance_types  = [var.instance_types] # default
-  ami_type        = var.ami_type         # default
-
-  scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
-  }
-
-  # Optional: Allow external changes without Terraform plan difference
-  lifecycle {
-    ignore_changes = [scaling_config[0].desired_size]
-  }
-
-  update_config {
-    max_unavailable = 1
-  }
-
-  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
-  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
-  depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
-    null_resource.kubectl,
-  ]
-}
+#resource "aws_eks_node_group" "nodes" {
+#  cluster_name    = aws_eks_cluster.cluster.name
+#  node_group_name = var.name
+#  node_role_arn   = aws_iam_role.nodes.arn
+#  subnet_ids      = var.subnets_node_group
+#  version         = var.k8s_version
+#  release_version = var.ami_release_version
+#  capacity_type   = var.capacity_type    # default
+#  disk_size       = var.disk_size        # default
+#  instance_types  = [var.instance_types] # default
+#  ami_type        = var.ami_type         # default
+#
+#  scaling_config {
+#    desired_size = 1
+#    max_size     = 2
+#    min_size     = 1
+#  }
+#
+#  # Optional: Allow external changes without Terraform plan difference
+#  lifecycle {
+#    ignore_changes = [scaling_config[0].desired_size]
+#  }
+#
+#  update_config {
+#    max_unavailable = 1
+#  }
+#
+#  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+#  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
+#  depends_on = [
+#    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+#    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+#    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+#    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+#    null_resource.kubectl,
+#  ]
+#}

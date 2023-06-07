@@ -26,4 +26,6 @@ output "nodes_role_arn" {
   value = aws_iam_role.nodes.arn
 }
 
-
+output "cert_authority_data" {
+  value = aws_eks_cluster.cluster.certificate_authority[0].data
+}

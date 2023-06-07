@@ -171,20 +171,18 @@ resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
   role       = aws_iam_role.nodes.name
 }
 
-#resource "kubernetes_service_account" "aws-node" {
-#  metadata {
-#    name = "aws-node"
-#    annotations = {
-#      "eks.amazonaws.com/role-arn" = aws_iam_role.nodes.arn
-#    }
-#  }
-#  depends_on = [
-#    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-#    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-#    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-#    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
-#  ]
-#}
+resource "null_resource" "annotate_serviceaccount" {
+  provisioner "local-exec" {
+    command     = "kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}"
+    interpreter = ["/bin/bash", "-c"]
+    depends_on = [
+      aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+      aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+      aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+      aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+    ]
+  }
+}
 
 #resource "aws_eks_node_group" "nodes" {
 #  cluster_name    = aws_eks_cluster.cluster.name

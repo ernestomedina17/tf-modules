@@ -1,5 +1,5 @@
 locals {
-  config_map_aws_auth_file_path = "${var.home}/.kube/config_map_aws_auth.yaml"
+  config_map_aws_auth_file_path = "${var.myhome}/.kube/config_map_aws_auth.yaml"
   config_map_aws_auth           = <<CONFIGMAPAWSAUTH
 apiVersion: v1
 kind: ConfigMap

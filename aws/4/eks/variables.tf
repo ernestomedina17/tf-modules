@@ -3,6 +3,11 @@ variable "name" {
   description = "Name of the cluster and roles"
 }
 
+variable "myhome" {
+  type = string
+  description = "Your HOME directory"
+}
+
 variable "k8s_version" {
   type        = string
   description = "Kubernetes version"

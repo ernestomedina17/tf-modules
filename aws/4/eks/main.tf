@@ -94,7 +94,7 @@ resource "null_resource" "kubectl" {
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.cluster.name
   addon_name   = "vpc-cni"
-  depends_on = [ null_resource.kubectl ]
+  depends_on   = [null_resource.kubectl]
 }
 
 data "tls_certificate" "cert" {
@@ -102,14 +102,26 @@ data "tls_certificate" "cert" {
   #depends_on = [ aws_eks_cluster.cluster ]
 }
 
+# Required by vpc-cni plugin
 resource "aws_iam_openid_connect_provider" "openid" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = data.tls_certificate.cert.certificates[*].sha1_fingerprint
   url             = data.tls_certificate.cert.url
-  depends_on = [ aws_eks_addon.vpc_cni ]
+  depends_on      = [aws_eks_addon.vpc_cni]
 }
 
-data "aws_iam_policy_document" "openid" {
+data "aws_iam_policy_document" "nodes" {
+
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      identifiers = "ec2.amazonaws.com"
+      type        = "Service"
+    }
+  }
+
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -120,6 +132,12 @@ data "aws_iam_policy_document" "openid" {
       values   = ["system:serviceaccount:kube-system:aws-node"]
     }
 
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.openid.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
     principals {
       identifiers = [aws_iam_openid_connect_provider.openid.arn]
       type        = "Federated"
@@ -127,24 +145,10 @@ data "aws_iam_policy_document" "openid" {
   }
 }
 
-resource "aws_iam_role" "openid" {
-  assume_role_policy = data.aws_iam_policy_document.openid.json
-  name               = "${var.name}-openid"
-}
-
 resource "aws_iam_role" "nodes" {
-  name = "eks-node-group-${var.name}"
-
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
+  name               = "eks-node-group-${var.name}"
+  assume_role_policy = data.aws_iam_policy_document.openid.json
+  depends_on         = [aws_iam_openid_connect_provider.openid]
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
@@ -166,6 +170,23 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.nodes.name
+}
+
+# Annotate the Kubernetes service account with the nodes role.
+# kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=arn:aws:iam::111122223333:role/AmazonEKSVPCCNIRole
+resource "kubernetes_service_account" "aws-node" {
+  metadata {
+    name = "aws-node"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.nodes.arn
+    }
+  }
+  depends_on = [
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+  ]
 }
 
 #resource "aws_eks_node_group" "nodes" {

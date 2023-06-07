@@ -14,7 +14,7 @@ output "cluster_identity" {
   value = aws_eks_cluster.cluster.identity
 }
 
-output "unicron_eks_vpc_config" {
+output "eks_vpc_config" {
   value = aws_eks_cluster.cluster.vpc_config
 }
 

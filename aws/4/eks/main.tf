@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "cluster" {
   name     = var.name
   version  = var.k8s_version
-  role_arn = aws_iam_role.unicron.arn
+  role_arn = aws_iam_role.cluster.arn
 
   encryption_config {
     provider {
@@ -80,7 +80,7 @@ resource "null_resource" "kubectl" {
   }
 
   #provisioner "local-exec" {
-  #  command     = 'eksctl get cluster --name unicron -o json | jq --raw-output '.[] | "[settings.kubernetes]\napi-server = \"" + .Endpoint + "\"\ncluster-certificate =\"" + .CertificateAuthority.Data + "\"\ncluster-name = \"unicron\""''
+  #  command     = 'eksctl get cluster --name ${var.name} -o json | jq --raw-output '.[] | "[settings.kubernetes]\napi-server = \"" + .Endpoint + "\"\ncluster-certificate =\"" + .CertificateAuthority.Data + "\"\ncluster-name = \"unicron\""''
   #  interpreter = ["/bin/bash", "-c"]
   #}
 

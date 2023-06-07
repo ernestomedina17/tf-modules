@@ -145,49 +145,49 @@ data "aws_iam_policy_document" "nodes" {
   }
 }
 
-resource "aws_iam_role" "nodes" {
-  name               = "eks-node-group-${var.name}"
-  assume_role_policy = data.aws_iam_policy_document.openid.json
-  depends_on         = [aws_iam_openid_connect_provider.openid]
-}
-
-resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.nodes.name
-}
-
-resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.nodes.name
-}
-
-resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.nodes.name
-}
-
-# Bottlerocket's default SSM agent to get a shell session on the instance.
-resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.nodes.name
-}
-
-# Annotate the Kubernetes service account with the nodes role.
-# kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=arn:aws:iam::111122223333:role/AmazonEKSVPCCNIRole
-resource "kubernetes_service_account" "aws-node" {
-  metadata {
-    name = "aws-node"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.nodes.arn
-    }
-  }
-  depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
-  ]
-}
+#resource "aws_iam_role" "nodes" {
+#  name               = "eks-node-group-${var.name}"
+#  assume_role_policy = data.aws_iam_policy_document.openid.json
+#  depends_on         = [aws_iam_openid_connect_provider.openid]
+#}
+#
+#resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
+#  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+#  role       = aws_iam_role.nodes.name
+#}
+#
+#resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
+#  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+#  role       = aws_iam_role.nodes.name
+#}
+#
+#resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
+#  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+#  role       = aws_iam_role.nodes.name
+#}
+#
+## Bottlerocket's default SSM agent to get a shell session on the instance.
+#resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
+#  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+#  role       = aws_iam_role.nodes.name
+#}
+#
+## Annotate the Kubernetes service account with the nodes role.
+## kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=arn:aws:iam::111122223333:role/AmazonEKSVPCCNIRole
+#resource "kubernetes_service_account" "aws-node" {
+#  metadata {
+#    name = "aws-node"
+#    annotations = {
+#      "eks.amazonaws.com/role-arn" = aws_iam_role.nodes.arn
+#    }
+#  }
+#  depends_on = [
+#    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+#    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+#    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+#    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+#  ]
+#}
 
 #resource "aws_eks_node_group" "nodes" {
 #  cluster_name    = aws_eks_cluster.cluster.name

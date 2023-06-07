@@ -2,9 +2,9 @@ output "cluster_id" {
   value = aws_eks_cluster.cluster.id
 }
 
-output "nodes_id" {
-  value = aws_eks_node_group.nodes.id
-}
+#output "nodes_id" {
+#  value = aws_eks_node_group.nodes.id
+#}
 
 output "cluster_endpoint" {
   value = aws_eks_cluster.cluster.endpoint

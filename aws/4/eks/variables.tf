@@ -18,9 +18,14 @@ variable "kms_key_arn" {
   description = "Encryption is required"
 }
 
-variable "subnets" {
+variable "subnets_cluster" {
   type        = list(string)
-  description = "Private subnet(s) of your VPC, NAT GW might be required"
+  description = "At least 2 subnets in different AZ are required"
+}
+
+variable "subnets_node_group" {
+  type        = list(string)
+  description = "Private subnet(s), NAT GW might be required at least in one"
 }
 
 # Node Group

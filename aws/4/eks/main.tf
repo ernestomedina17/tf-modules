@@ -12,7 +12,7 @@ resource "aws_eks_cluster" "cluster" {
 
   # Using previate subnets whenever possible is recommended.
   vpc_config {
-    subnet_ids = var.subnets
+    subnet_ids = var.subnets_cluster
   }
 
   # Different from your AWS VPC
@@ -130,7 +130,7 @@ resource "aws_eks_node_group" "nodes" {
   cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = var.name
   node_role_arn   = aws_iam_role.nodes.arn
-  subnet_ids      = aws_eks_cluster.cluster.vpc_config[0].subnet_ids
+  subnet_ids      = var.subnets_node_group
   version         = var.k8s_version
   release_version = var.ami_release_version
   capacity_type   = var.capacity_type    # default

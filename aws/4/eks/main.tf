@@ -175,13 +175,14 @@ resource "null_resource" "annotate_serviceaccount" {
   provisioner "local-exec" {
     command     = "kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}"
     interpreter = ["/bin/bash", "-c"]
-    depends_on = [
-      aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-      aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-      aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-      aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
-    ]
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+  ]
 }
 
 #resource "aws_eks_node_group" "nodes" {

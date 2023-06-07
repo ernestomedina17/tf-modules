@@ -40,9 +40,7 @@ resource "aws_internet_gateway" "public" {
   tags   = { Name = var.name }
 }
 
-resource "aws_eip" "public" {
-  domain = "vpc"
-}
+resource "aws_eip" "public" {}
 
 # Only one as of now to save money.
 resource "aws_nat_gateway" "public" {

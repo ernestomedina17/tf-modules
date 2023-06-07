@@ -4,7 +4,7 @@ variable "name" {
 }
 
 variable "myhome" {
-  type = string
+  type        = string
   description = "Your HOME directory"
 }
 

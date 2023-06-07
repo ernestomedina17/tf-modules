@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "nodes" {
     effect  = "Allow"
 
     principals {
-      identifiers = "ec2.amazonaws.com"
+      identifiers = ["ec2.amazonaws.com"]
       type        = "Service"
     }
   }

@@ -147,7 +147,7 @@ data "aws_iam_policy_document" "nodes" {
 
 resource "aws_iam_role" "nodes" {
   name               = "eks-node-group-${var.name}"
-  assume_role_policy = data.aws_iam_policy_document.openid.json
+  assume_role_policy = data.aws_iam_policy_document.nodes.json
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {

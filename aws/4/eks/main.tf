@@ -98,7 +98,7 @@ resource "aws_eks_addon" "vpc_cni" {
 }
 
 data "tls_certificate" "cert" {
-  url = aws_eks_cluster.example.identity[0].oidc[0].issuer
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
   #depends_on = [ aws_eks_cluster.cluster ]
 }
 

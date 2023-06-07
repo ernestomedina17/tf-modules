@@ -121,7 +121,7 @@ data "aws_iam_policy_document" "openid" {
     }
 
     principals {
-      identifiers = [aws_iam_openid_connect_provider.opendi.arn]
+      identifiers = [aws_iam_openid_connect_provider.openid.arn]
       type        = "Federated"
     }
   }

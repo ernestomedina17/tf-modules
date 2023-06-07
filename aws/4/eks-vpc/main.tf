@@ -40,6 +40,14 @@ resource "aws_internet_gateway" "public" {
   tags   = { Name = var.name }
 }
 
+# Only one as of now to save money.
+resource "aws_nat_gateway" "public" {
+  #count             = var.az_counts
+  connectivity_type = "public"
+  #subnet_id         = aws_subnet.private.*.id[count.index]
+  subnet_id = aws_subnet.pubilc.*.id[0]
+}
+
 resource "aws_route" "public" {
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
@@ -83,10 +91,3 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_default_route_table.private.id
 }
 
-# Only one as of now to save money.
-resource "aws_nat_gateway" "private" {
-  #count             = var.az_counts
-  connectivity_type = "private"
-  #subnet_id         = aws_subnet.private.*.id[count.index]
-  subnet_id = aws_subnet.private.*.id[0]
-}

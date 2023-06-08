@@ -182,7 +182,7 @@ resource "aws_iam_openid_connect_provider" "openid" {
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name             = aws_eks_cluster.cluster.name
   addon_name               = "vpc-cni"
-  service_account_role_arn = aws_iam_role.nodes.name.arn
+  service_account_role_arn = aws_iam_role.nodes.arn
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,

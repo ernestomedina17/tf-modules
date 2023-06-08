@@ -197,6 +197,11 @@ resource "aws_eks_node_group" "nodes" {
   instance_types  = [var.instance_types] # default
   ami_type        = var.ami_type         # default
 
+  remove_access {
+    ec2_ssh_key = var.ssh_key_name
+    #source_security_group_ids = var.nodes_ssh_sg
+  }
+
   scaling_config {
     desired_size = 1
     max_size     = 2

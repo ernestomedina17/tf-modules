@@ -90,25 +90,6 @@ resource "null_resource" "kubectl" {
   ]
 }
 
-# AWS says this is not required but the nodes won't work without it.
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.cluster.name
-  addon_name   = "vpc-cni"
-  depends_on   = [aws_eks_cluster.cluster]
-}
-
-data "tls_certificate" "cert" {
-  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-}
-
-# Required by vpc-cni plugin
-resource "aws_iam_openid_connect_provider" "openid" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = data.tls_certificate.cert.certificates[*].sha1_fingerprint
-  url             = data.tls_certificate.cert.url
-  depends_on      = [aws_eks_cluster.cluster]
-}
-
 data "aws_iam_policy_document" "nodes" {
 
   statement {
@@ -185,6 +166,32 @@ resource "null_resource" "annotate_serviceaccount" {
   ]
 }
 
+data "tls_certificate" "cert" {
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+# Required by vpc-cni plugin
+resource "aws_iam_openid_connect_provider" "openid" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = data.tls_certificate.cert.certificates[*].sha1_fingerprint
+  url             = data.tls_certificate.cert.url
+  depends_on      = [aws_eks_cluster.cluster]
+}
+
+# AWS says this is not required but the nodes won't work without it.
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name             = aws_eks_cluster.cluster.name
+  addon_name               = "vpc-cni"
+  service_account_role_arn = aws_iam_role.nodes.name.arn
+  depends_on = [
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
+    aws_iam_openid_connect_provider.openid
+  ]
+}
+
 resource "aws_eks_node_group" "nodes" {
   cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = var.name
@@ -225,5 +232,6 @@ resource "aws_eks_node_group" "nodes" {
     aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.AmazonSSMManagedInstanceCore,
     null_resource.annotate_serviceaccount,
+    aws_eks_addon.vpc_cni,
   ]
 }

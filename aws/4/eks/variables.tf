@@ -59,7 +59,7 @@ variable "ami_type" {
 }
 
 variable "ssh_key_name" {
-  type = string
+  type        = string
   description = "Usually a RSA Pub Key to SSH the nodes in the Linux group"
 }
 

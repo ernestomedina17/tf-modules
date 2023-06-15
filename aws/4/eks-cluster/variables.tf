@@ -38,6 +38,11 @@ variable "subnets_cluster" {
   description = "At least 2 subnets in different AZ are required"
 }
 
+variable "security_group_ids" {
+  type        = list(string)
+  description = "Allow comm. between your worker nodes and the K8s control plane"
+}
+
 #variable "subnets_node_group" {
 #  type        = list(string)
 #  description = "Private subnet(s)"

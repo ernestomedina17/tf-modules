@@ -10,9 +10,12 @@ resource "aws_eks_cluster" "cluster" {
     resources = ["secrets"]
   }
 
-  # Using previate subnets whenever possible is recommended.
+  # Private Cluster
   vpc_config {
-    subnet_ids = var.subnets_cluster
+    subnet_ids              = var.subnets_cluster
+    endpoint_private_access = true
+    endpoint_public_access  = false
+    security_group_ids      = var.security_group_ids
   }
 
   # Different from your AWS VPC

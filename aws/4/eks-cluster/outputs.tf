@@ -17,3 +17,11 @@ output "eks_vpc_config" {
 output "cert_authority_data" {
   value = aws_eks_cluster.cluster.certificate_authority[0].data
 }
+
+output "web_identity" {
+  value = replace(aws_iam_openid_connect_provider.openid.url, "https://", "")
+}
+
+output "web_identity_arn" {
+  value = aws_iam_openid_connect_provider.openid.arn
+}

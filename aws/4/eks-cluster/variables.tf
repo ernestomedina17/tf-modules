@@ -8,7 +8,7 @@ variable "name" {
 }
 
 variable "iam_role_cluster_arn" {
-  type = string
+  type        = string
   description = "IAM EKS Cluster Role"
 }
 

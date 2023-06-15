@@ -1,4 +1,4 @@
-resolve_conflicts_on_updateresource "aws_eks_cluster" "cluster" {
+resource "aws_eks_cluster" "cluster" {
   name     = var.name
   version  = var.k8s_version
   role_arn = var.iam_role_cluster_arn

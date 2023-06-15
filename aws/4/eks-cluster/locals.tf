@@ -1,4 +1,5 @@
 locals {
+  service_account_role_arn      = "arn:aws:iam::${var.aws_account_id}:role/eks-node-group-${var.name}"
   config_map_aws_auth_file_path = "${var.myhome}/.kube/config_map_aws_auth.yaml"
   config_map_aws_auth           = <<CONFIGMAPAWSAUTH
 apiVersion: v1

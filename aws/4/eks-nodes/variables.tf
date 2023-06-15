@@ -48,10 +48,10 @@ variable "ami_type" {
   default     = "AL2_ARM_64"
 }
 
-variable "ssh_key_name" {
-  type        = string
-  description = "Usually a RSA Pub Key to SSH the nodes in the Linux group"
-}
+#variable "ssh_key_name" {
+#  type        = string
+#  description = "Usually a RSA Pub Key to SSH the nodes in the Linux group"
+#}
 
 #variable "nodes_ssh_sg_id" {
 #  type = string

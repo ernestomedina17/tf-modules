@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "cluster" {
   name     = var.name
   version  = var.k8s_version
-  role_arn = var.aws_iam_role_cluster_arn
+  role_arn = var.iam_role_cluster_arn
 
   encryption_config {
     provider {

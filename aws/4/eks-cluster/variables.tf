@@ -7,6 +7,11 @@ variable "name" {
   description = "Name of the cluster and roles"
 }
 
+variable "iam_role_cluster_arn" {
+  type = string
+  description = "IAM EKS Cluster Role"
+}
+
 variable "kube_proxy_version" {
   type        = string
   description = "v1.27.1-eksbuild.1"

@@ -3,7 +3,7 @@ variable "name" {
   description = "Name of the cluster and roles"
 }
 
-varriable "kube_proxy_version" {
+variable "kube_proxy_version" {
   type        = string
   description = "v1.27.1-eksbuild.1"
 }

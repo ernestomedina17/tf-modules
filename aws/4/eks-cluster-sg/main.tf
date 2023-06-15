@@ -11,7 +11,7 @@ resource "aws_security_group" "eks_cluster" {
 }
 
 # TO-DO: Enhance Security 
-resource "aws_security_group_rule" "default" {
+resource "aws_security_group_rule" "ingress_default" {
   type              = "ingress"
   from_port         = 0
   to_port           = 0
@@ -20,7 +20,7 @@ resource "aws_security_group_rule" "default" {
   security_group_id = aws_security_group.eks_cluster.id
 }
 
-resource "aws_security_group_rule" "default" {
+resource "aws_security_group_rule" "egress_default" {
   type              = "egress"
   from_port         = 0
   to_port           = 0

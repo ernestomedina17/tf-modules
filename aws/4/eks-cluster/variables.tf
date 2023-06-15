@@ -47,6 +47,16 @@ variable "security_group_ids" {
   description = "Allow comm. between your worker nodes and the K8s control plane"
 }
 
+variable "endpoint_private_access" {
+  type        = bool
+  description = "only reachable from a private subnet"
+}
+
+variable "endpoint_public_access" {
+  type        = bool
+  description = "reachable from the internet"
+}
+
 #variable "subnets_node_group" {
 #  type        = list(string)
 #  description = "Private subnet(s)"

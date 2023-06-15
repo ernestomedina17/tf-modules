@@ -3,10 +3,12 @@ resource "aws_security_group" "eks_cluster" {
   description = "https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html"
   vpc_id      = var.vpc_id
 
+  # Needs to be added manually: aws:eks:cluster-name as AWS rejects the double colons. 
   tags = {
     Name                                = "eks-cluster-sg-${var.name}-15062023"
     "kubernetes.io/cluster/${var.name}" = "owned"
-    "aws\u003Aeks\u003Acluster-name"    = var.name
+    "aws:eks:cluster-name"              = var.name
+    #"aws\u003Aeks\u003Acluster-name"    = var.name
   }
 }
 

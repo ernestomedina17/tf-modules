@@ -17,10 +17,10 @@ variable "kube_proxy_version" {
   description = "v1.27.1-eksbuild.1"
 }
 
-variable "coredns_version" {
-  type        = string
-  description = "v1.10.1-eksbuild.1"
-}
+#variable "coredns_version" {
+#  type        = string
+#  description = "v1.10.1-eksbuild.1"
+#}
 
 variable "vpc_cni_version" {
   type        = string

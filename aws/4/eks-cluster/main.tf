@@ -33,14 +33,14 @@ resource "aws_eks_addon" "kube_proxy" {
   depends_on               = [aws_eks_cluster.cluster]
 }
 
-resource "aws_eks_addon" "coredns" {
-  cluster_name                = aws_eks_cluster.cluster.name
-  addon_name                  = "coredns"
-  addon_version               = var.coredns_version
-  service_account_role_arn    = local.service_account_role_arn
-  depends_on               = [aws_eks_cluster.cluster]
-}
-
+# If no nodes joined gives Status:Degraded InsufficientNumberOfReplicas
+#resource "aws_eks_addon" "coredns" {
+#  cluster_name                = aws_eks_cluster.cluster.name
+#  addon_name                  = "coredns"
+#  addon_version               = var.coredns_version
+#  service_account_role_arn    = local.service_account_role_arn
+#  depends_on               = [aws_eks_cluster.cluster]
+#}
 
 data "tls_certificate" "cert" {
   url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer

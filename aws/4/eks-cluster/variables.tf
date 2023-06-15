@@ -1,3 +1,7 @@
+variable "aws_account_id" {
+  type = string
+}
+
 variable "name" {
   type        = string
   description = "Name of the cluster and roles"

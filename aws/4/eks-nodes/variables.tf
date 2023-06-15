@@ -48,6 +48,11 @@ variable "ami_type" {
   default     = "AL2_ARM_64"
 }
 
+variable "coredns_version" {
+  type        = string
+  description = "v1.10.1-eksbuild.1"
+}
+
 #variable "ssh_key_name" {
 #  type        = string
 #  description = "Usually a RSA Pub Key to SSH the nodes in the Linux group"

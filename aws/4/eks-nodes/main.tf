@@ -30,3 +30,11 @@ resource "aws_eks_node_group" "nodes" {
     max_unavailable = 1
   }
 }
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name  = var.name
+  addon_name    = "coredns"
+  addon_version = var.coredns_version
+  #resolve_conflicts_on_update = "PRESERVE"
+  depends_on = [aws_eks_node_group.nodes]
+}

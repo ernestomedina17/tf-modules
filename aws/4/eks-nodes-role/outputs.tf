@@ -28,5 +28,7 @@ output "apply_cm_aws_auth" {
 }
 
 output "annotate_serviceaccount" {
-  value = "kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}"
+  value = "\n
+kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}\n
+kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/sts-regional-endpoints=true \n"
 }

@@ -6,7 +6,7 @@ resource "aws_security_group" "eks_cluster" {
   tags = {
     Name                                = "eks-cluster-sg-${var.name}-15062023"
     "kubernetes.io/cluster/${var.name}" = "owned"
-    "aws:eks\\:cluster-name"            = var.name
+    "aws\u003Aeks\u003Acluster-name"    = var.name
   }
 }
 

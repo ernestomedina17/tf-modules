@@ -1,4 +1,4 @@
-resource "aws_eks_cluster" "cluster" {
+resolve_conflicts_on_updateresource "aws_eks_cluster" "cluster" {
   name     = var.name
   version  = var.k8s_version
   role_arn = var.iam_role_cluster_arn
@@ -38,7 +38,7 @@ resource "aws_eks_addon" "coredns" {
   addon_name                  = "coredns"
   addon_version               = var.coredns_version
   service_account_role_arn    = local.service_account_role_arn
-  resolve_conflicts_on_update = "PRESERVE"
+  depends_on               = [aws_eks_cluster.cluster]
 }
 
 

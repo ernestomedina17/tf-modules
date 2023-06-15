@@ -19,16 +19,11 @@ data:
 CONFIGMAPAWSAUTH
 }
 
-output "create_kubeconfig" {
-  value = "aws eks update-kubeconfig --region eu-central-1 --name ${var.name}"
-}
-
-output "apply_cm_aws_auth" {
-  value = "kubectl apply -f config_map_aws_auth.yaml"
-}
-
-output "annotate_serviceaccount" {
-  value = "\n
-kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}\n
-kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/sts-regional-endpoints=true \n"
+output "manual_steps" {
+  value = <<EOT
+aws eks update-kubeconfig --region eu-central-1 --name ${var.name}
+kubectl apply -f config_map_aws_auth.yaml
+kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}
+kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/sts-regional-endpoints=true
+EOT
 }

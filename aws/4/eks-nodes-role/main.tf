@@ -58,3 +58,55 @@ resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.nodes.name
 }
+
+# The following manual steps are required by EKS to use the role.
+resource "local_file" "aws_auth_configmap" {
+    filename = local.configmap_filepath
+    content  = <<EOT
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: ${aws_iam_role.nodes.arn}
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+EOT
+}
+
+resource "null_resource" "eks_configs_and_annotations" {
+  provisioner "local-exec" {
+    command     = "[ -e  ${local.configmap_filepath} ] && rm -v ~/.kube/config || echo 0"
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  provisioner "local-exec" {
+    command     = "aws eks update-kubeconfig --region eu-central-1 --name ${var.name}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  provisioner "local-exec" {
+    command     = "kubectl apply -f ${local.configmap_filepath}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  provisioner "local-exec" {
+    command     = "kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=${aws_iam_role.nodes.arn}"
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  # Check in IAM - Account Settings - STS - if your region is enabled.
+  provisioner "local-exec" {
+    command     = "kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/sts-regional-endpoints=true"
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  depends_on = [
+    local_file.aws_auth_configmap,
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy
+  ]
+}

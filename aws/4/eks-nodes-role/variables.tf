@@ -1,3 +1,5 @@
+variable "myhome" {}
+
 variable "name" {
   type        = string
   description = "Name of the cluster and roles"

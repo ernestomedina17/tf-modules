@@ -61,8 +61,8 @@ resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
 
 # The following manual steps are required by EKS to use the role.
 resource "local_file" "aws_auth_configmap" {
-    filename = local.configmap_filepath
-    content  = <<EOT
+  filename = local.configmap_filepath
+  content  = <<EOT
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -58,6 +58,6 @@ variable "endpoint_public_access" {
 }
 
 variable "log_retention_days" {
-  type = string
+  type        = number
   description = "log retention policy in days"
 }

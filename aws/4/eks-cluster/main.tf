@@ -3,6 +3,8 @@ resource "aws_eks_cluster" "cluster" {
   version  = var.k8s_version
   role_arn = var.iam_role_cluster_arn
 
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   encryption_config {
     provider {
       key_arn = var.kms_key_arn
@@ -23,6 +25,12 @@ resource "aws_eks_cluster" "cluster" {
     service_ipv4_cidr = "172.20.0.0/16"
     ip_family         = "ipv4"
   }
+}
+
+resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
+  # Reference: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+  name              = "/aws/eks/${var.name}/cluster"
+  retention_in_days = var.log_retention_days
 }
 
 resource "aws_eks_addon" "kube_proxy" {

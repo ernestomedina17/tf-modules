@@ -27,11 +27,11 @@ resource "aws_eks_cluster" "cluster" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
-  # Reference: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
-  name              = "/aws/eks/${var.name}/cluster"
-  retention_in_days = var.log_retention_days
-}
+#resource "aws_cloudwatch_log_group" "eks_cluster_log_group" {
+#  # Reference: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+#  name              = "/aws/eks/${var.name}/cluster"
+#  retention_in_days = var.log_retention_days
+#}
 
 resource "aws_eks_addon" "kube_proxy" {
   cluster_name             = aws_eks_cluster.cluster.name

@@ -45,6 +45,7 @@ variable "subnets_cluster" {
 variable "security_group_ids" {
   type        = list(string)
   description = "Allow comm. between your worker nodes and the K8s control plane"
+  default     = []
 }
 
 variable "endpoint_private_access" {

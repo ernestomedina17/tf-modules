@@ -25,7 +25,3 @@ output "web_identity" {
 output "web_identity_arn" {
   value = aws_iam_openid_connect_provider.openid.arn
 }
-
-output "sg_id" {
-  value = aws_eks_cluster.cluster.cluster_security_group_id
-}
